@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Feud: ICT Edition</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent: #58a6ff;
+      --text: #c9d1d9;
+      --correct: #238636;
+      --wrong: #da3633;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    h1 { text-align: center; color: var(--accent); margin-bottom: 8px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+    .easy-bg { background: #1f6feb; color: white; }
+    .medium-bg { background: #d29922; color: black; }
+    .hard-bg { background: #f85149; color: white; }
+
+    .header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 8px;
+    }
+    .options-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: #21262d;
+      color: var(--text);
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-align: left;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .options-btn:hover { background: #30363d; }
+    .options-btn.correct { background: var(--correct) !important; color: white; }
+    .options-btn.wrong { background: var(--wrong) !important; color: white; }
+    .next-btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+    }
+    .restart-btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      background: var(--correct);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>FAMILY FEUD: ICT</h1>
+  
+  <div id="game-screen">
+    <div class="header-info">
+      <span id="level-badge" class="badge easy-bg">EASY (1pt/q)</span>
+      <div>Score: <strong id="score">0</strong></div>
+    </div>
+    <div id="question-number" style="color: #8b949e; font-size: 0.9rem;">Question 1 / 15</div>
+    <h3 id="question-text">Loading question...</h3>
+    <div id="options-container"></div>
+    <button id="next-btn" class="next-btn" onclick="nextQuestion()">Next Question</button>
+  </div>
+
+  <div id="result-screen" style="display: none; text-align: center;">
+    <h2>Quiz Completed!</h2>
+    <p>Your total score is: <strong id="final-score">0</strong> / 30 points</p>
+    <button class="restart-btn" onclick="restartGame()">Play Again</button>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    // --- EASY (5 Questions, 1 Point Each) ---
+    {
+      level: "EASY (1 pt)",
+      bg: "easy-bg",
+      pts: 1,
+      q: "1. What is an E-Portfolio?",
+      options: ["A. A digital collection of a student's learning journey", "B. A social media account", "C. An online gaming platform"],
+      ans: 0
+    },
+    {
+      level: "EASY (1 pt)",
+      bg: "easy-bg",
+      pts: 1,
+      q: "2. What is the main purpose of an E-Portfolio?",
+      options: ["A. To entertain students", "B. To document learning progress and showcase achievements", "C. To replace teachers"],
+      ans: 1
+    },
+    {
+      level: "EASY (1 pt)",
+      bg: "easy-bg",
+      pts: 1,
+      q: "3. Which of the following is a component of an E-Portfolio?",
+      options: ["A. Online games", "B. Advertisements", "C. Reflection"],
+      ans: 2
+    },
+    {
+      level: "EASY (1 pt)",
+      bg: "easy-bg",
+      pts: 1,
+      q: "4. Which platform can be used to create an E-Portfolio?",
+      options: ["A. Google Sites", "B. Calculator", "C. Music Player"],
+      ans: 0
+    },
+    {
+      level: "EASY (1 pt)",
+      bg: "easy-bg",
+      pts: 1,
+      q: "5. What is Project-Based Assessment?",
+      options: ["A. Learning through memorization only", "B. Evaluating students through meaningful projects and real-world tasks", "C. Evaluating students through attendance only"],
+      ans: 1
+    },
+
+    // --- MEDIUM (5 Questions, 2 Points Each) ---
+    {
+      level: "MEDIUM (2 pts)",
+      bg: "medium-bg",
+      pts: 2,
+      q: "6. Which of the following is an example of an ICT-supported project?",
+      options: ["A. Sleeping", "B. Classroom cleaning", "C. Digital presentation"],
+      ans: 2
+    },
+    {
+      level: "MEDIUM (2 pts)",
+      bg: "medium-bg",
+      pts: 2,
+      q: "7. Which criterion measures the accuracy and completeness of an E-Portfolio?",
+      options: ["A. Content", "B. Creativity", "C. Reflection"],
+      ans: 0
+    },
+    {
+      level: "MEDIUM (2 pts)",
+      bg: "medium-bg",
+      pts: 2,
+      q: "8. What is the purpose of the reflection section in an E-Portfolio?",
+      options: ["A. To list classmates", "B. To explain what was learned and improved", "C. To display advertisements"],
+      ans: 1
+    },
+    {
+      level: "MEDIUM (2 pts)",
+      bg: "medium-bg",
+      pts: 2,
+      q: "9. Which is a benefit of E-Portfolios to students?",
+      options: ["A. Reduces creativity", "B. Limits communication", "C. Develops digital literacy"],
+      ans: 2
+    },
+    {
+      level: "MEDIUM (2 pts)",
+      bg: "medium-bg",
+      pts: 2,
+      q: "10. What should students do to respect the original creators of online materials?",
+      options: ["A. Give credit to sources", "B. Copy without permission", "C. Remove the creator's name"],
+      ans: 0
+    },
+
+    // --- HARD (5 Questions, 3 Points Each) ---
+    {
+      level: "HARD (3 pts)",
+      bg: "hard-bg",
+      pts: 3,
+      q: "11. What is ICT accessibility?",
+      options: ["A. Limiting technology to selected people", "B. Designing technology so as many people as possible can access and use it", "C. Allowing only experts to use technology"],
+      ans: 1
+    },
+    {
+      level: "HARD (3 pts)",
+      bg: "hard-bg",
+      pts: 3,
+      q: "12. What software reads text displayed on a computer or smartphone screen?",
+      options: ["A. Video editor", "B. Calculator", "C. Screen reader"],
+      ans: 2
+    },
+    {
+      level: "HARD (3 pts)",
+      bg: "hard-bg",
+      pts: 3,
+      q: "13. What is the purpose of captions and subtitles?",
+      options: ["A. To help deaf or hard-of-hearing people understand video content", "B. To decorate videos", "C. To remove audio"],
+      ans: 0
+    },
+    {
+      level: "HARD (3 pts)",
+      bg: "hard-bg",
+      pts: 3,
+      q: "14. What is ICT inclusion?",
+      options: ["A. Limiting access to technology", "B. Ensuring everyone has opportunities to participate in and benefit from technology", "C. Providing technology to selected people only"],
+      ans: 1
+    },
+    {
+      level: "HARD (3 pts)",
+      bg: "hard-bg",
+      pts: 3,
+      q: "15. Which law protects personal information in the Philippines?",
+      options: ["A. RA 10173", "B. RA 8293", "C. RA 11036"],
+      ans: 0
+    }
+  ];
+
+  let currentIdx = 0;
+  let score = 0;
+  let answered = false;
+
+  function loadQuestion() {
+    answered = false;
+    document.getElementById("next-btn").style.display = "none";
+    const q = questions[currentIdx];
+    
+    document.getElementById("question-number").innerText = `Question ${currentIdx + 1} / ${questions.length}`;
+    document.getElementById("question-text").innerText = q.q;
+    
+    const badge = document.getElementById("level-badge");
+    badge.innerText = q.level;
+    badge.className = `badge ${q.bg}`;
+
+    const container = document.getElementById("options-container");
+    container.innerHTML = "";
+
+    q.options.forEach((opt, index) => {
+      const btn = document.createElement("button");
+      btn.className = "options-btn";
+      btn.innerText = opt;
+      btn.onclick = () => selectOption(btn, index);
+      container.appendChild(btn);
+    });
+  }
+
+  function selectOption(selectedBtn, idx) {
+    if (answered) return;
+    answered = true;
+    
+    const q = questions[currentIdx];
+    const buttons = document.querySelectorAll(".options-btn");
+
+    if (idx === q.ans) {
+      selectedBtn.classList.add("correct");
+      score += q.pts;
+      document.getElementById("score").innerText = score;
+    } else {
+      selectedBtn.classList.add("wrong");
+      buttons[q.ans].classList.add("correct");
+    }
+
+    document.getElementById("next-btn").style.display = "block";
+  }
+
+  function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < questions.length) {
+      loadQuestion();
+    } else {
+      showResults();
+    }
+  }
+
+  function showResults() {
+    document.getElementById("game-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+    document.getElementById("final-score").innerText = score;
+  }
+
+  function restartGame() {
+    currentIdx = 0;
+    score = 0;
+    document.getElementById("score").innerText = "0";
+    document.getElementById("game-screen").style.display = "block";
+    document.getElementById("result-screen").style.display = "none";
+    loadQuestion();
+  }
+
+  loadQuestion();
+</script>
+</body>
+</html>
